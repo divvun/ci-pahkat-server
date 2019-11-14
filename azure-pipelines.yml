@@ -1,0 +1,34 @@
+jobs:
+  - job: 'Build'
+    pool:
+      vmImage: 'ubuntu-16.04'
+    steps:
+      - script: ./build_artifact.sh
+      - publish: $(System.DefaultWorkingDirectory)/dist.tar.gz
+        artifact: dist
+        displayName: Publish Artifacts
+  - job: 'Deploy'
+    dependsOn:
+      - Build
+    pool:
+      vmImage: 'ubuntu-16.04'
+    steps:
+      - script: |
+          sudo apt update
+          sudo apt install software-properties-common
+          sudo apt-add-repository --yes --update ppa:ansible/ansible
+          sudo apt install ansible
+        displayName: Install Ansible
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          buildType: current
+          artifactName: dist
+          targetPath: '$(Build.SourcesDirectory)/deployment'
+      - task: InstallSSHKey@0
+        inputs:
+          knownHostsEntry: $(knownHostsEntry)
+          sshPublicKey: $(sshPublicKey)
+          sshKeySecureFile: $(sshKeySecureFile)
+      - script: |
+          echo '$(deployHost) ansible_user=ci host_name=$(deployHost)' >> hosts
+          ansible-playbook -i hosts playbook.yml -vv

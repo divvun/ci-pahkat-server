@@ -1,0 +1,17 @@
+version: "3.7"
+services:
+  pahkat_server:
+    image: divvun/pahkat-server
+    environment:
+      - URL_PREFIX=https://{{ host_name }}/artifacts
+    volumes:
+      - "$PWD/artifacts:/app/artifacts"
+      - "./:/app/db"
+  caddy:
+    image: abiosoft/caddy
+    volumes:
+      - ./Caddyfile:/etc/Caddyfile
+      - ./.caddy:/root/.caddy
+    ports:
+      - "80:80"
+      - "443:443"

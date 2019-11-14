@@ -1,17 +1,17 @@
 jobs:
-  - job: 'Build'
+  - job: "Build"
     pool:
-      vmImage: 'ubuntu-16.04'
+      vmImage: "ubuntu-16.04"
     steps:
       - script: ./build_artifact.sh
       - publish: $(System.DefaultWorkingDirectory)/dist.tar.gz
         artifact: dist
         displayName: Publish Artifacts
-  - job: 'Deploy'
+  - job: "Deploy"
     dependsOn:
       - Build
     pool:
-      vmImage: 'ubuntu-16.04'
+      vmImage: "ubuntu-16.04"
     steps:
       - script: |
           sudo apt update
@@ -23,7 +23,7 @@ jobs:
         inputs:
           buildType: current
           artifactName: dist
-          targetPath: '$(Build.SourcesDirectory)/deployment'
+          targetPath: "$(Build.SourcesDirectory)/"
       - task: InstallSSHKey@0
         inputs:
           knownHostsEntry: $(knownHostsEntry)
